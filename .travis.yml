@@ -122,7 +122,7 @@ script:
       ${PHPUNIT_EXEC} ${PHPUNIT_OPTS};
     fi
   - if [[ ${CSFIXER_STAT} -eq 1 ]]; then
-      ${CSFIXER_EXEC} ${CSFIXER_OPTS};
+      ${CSFIXER_EXEC} fix ${CSFIXER_OPTS};
     fi
 
 after_success:
