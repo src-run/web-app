@@ -1,5 +1,6 @@
 ###> src-run/web-app ###
 /composer.lock
+/.idea/
 ###< src-run/web-app ###
 
 ###> symfony/framework-bundle ###
