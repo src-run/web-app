@@ -1,0 +1,28 @@
+#!/usr/bin/env php
+<?php
+
+/*
+ * This file is part of the `src-run/web-app` project.
+ *
+ * (c) Rob Frawley 2nd of Source Consulting <copyright@src.run>
+ *
+ * For the full copyright and license information, please view the LICENSE.md
+ * file that was distributed with this source code.
+ */
+
+if (!file_exists($filePath = __DIR__.'/../vendor/symfony/phpunit-bridge/bin/simple-phpunit')) {
+    printf('Unable to find the `simple-phpunit` script in `%s`.\n', dirname($filePath));
+    exit(1);
+}
+
+putenv(sprintf(
+        'SYMFONY_PHPUNIT_VERSION=%s', getenv('SYMFONY_PHPUNIT_VERSION') ?: '6.5'
+));
+putenv(sprintf(
+        'SYMFONY_PHPUNIT_REMOVE=%s', getenv('SYMFONY_PHPUNIT_REMOVE') ?: ''
+));
+putenv(sprintf(
+        'SYMFONY_PHPUNIT_DIR=%s', getenv('SYMFONY_PHPUNIT_DIR') ?: __DIR__.'/.phpunit'
+));
+
+require $filePath;

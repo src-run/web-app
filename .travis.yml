@@ -1,0 +1,133 @@
+---
+
+#
+# This file is part of the `src-run/web-app` project.
+#
+# (c) Rob Frawley 2nd of Source Consulting <copyright@src.run>
+#
+# For the full copyright and license information, view the LICENSE.md
+# file distributed with this source code.
+#
+
+language : php
+
+dist: xenial
+
+sudo: false
+
+git:
+
+  depth: 3
+
+cache:
+
+  directories:
+    - $HOME/.composer/cache
+
+env:
+
+  global:
+    - SYMFONY_DEPRECATIONS_HELPER="weak_vendors"
+    - CODECOV_FILE_CLOVER="var/build/coverage-clover.xml"
+    - CODECOV_FILE_UPLOAD="var/build/coverage-upload.json"
+    - CODECOV_STAT=0
+    - CODECOV_EXEC="vendor/bin/php-coveralls"
+    - CODECOV_OPTS="--no-interaction --ansi -vvv --exclude-no-stmt --coverage_clover=${CODECOV_FILE_CLOVER} --json_path=${CODECOV_FILE_UPLOAD}"
+    - CSFIXER_STAT=0
+    - CSFIXER_EXEC="vendor/bin/php-cs-fixer"
+    - CSFIXER_OPTS="--no-interaction --ansi -vvv --diff"
+    - COMPOSE_STAT=1
+    - COMPOSE_EXEC="composer"
+    - COMPOSE_OPTS="--no-interaction --ansi --no-progress --prefer-dist --no-suggest --optimize-autoloader --profile"
+    - PHPUNIT_STAT=1
+    - PHPUNIT_EXEC="vendor/bin/simple-phpunit"
+    - PHPUNIT_SHARED_OPTS="-v --colors=always"
+    - PHPUNIT_OPTS="${PHPUNIT_SHARED_OPTS} --no-coverage"
+
+
+matrix:
+
+  fast_finish: true
+
+  include:
+
+    - name: "unit-tests/7.1"
+      php: 7.1
+    - name: "unit-tests/7.1 (deps-lowest)"
+      php: 7.1
+      env:
+        - COMPOSE_OPTS="${COMPOSE_OPTS} --prefer-lowest"
+    - name: "unit-tests/7.2"
+      php: 7.2
+    - name: "unit-tests/7.3"
+      php: 7.3
+    - name: "inst-prods/7.3"
+      php: 7.3
+      env:
+        - PHPUNIT_STAT=0
+        - COMPOSE_OPTS="${COMPOSE_OPTS} --no-dev"
+    - name: "code-check/7.3"
+      php: 7.3
+      env:
+        - COMPOSE_STAT=0
+        - PHPUNIT_STAT=0
+        - CSFIXER_STAT=1
+    - name: "code-cover/7.3"
+      php: 7.3
+      env:
+        - CODECOV_STAT=1
+        - PHPUNIT_OPTS="${PHPUNIT_SHARED_OPTS} --coverage-text --coverage-clover=${CODECOV_CLOVER_FILE}"
+    - name: "unit-tests/7.4-snapshot (allow-fail)"
+      php: 7.4snapshot
+      env:
+        - COMPOSE_OPTS="${COMPOSE_OPTS} --ignore-platform-reqs"
+    - name: "unit-tests/nightly (allow-fail)"
+      php: nightly
+      env:
+        - COMPOSE_OPTS="${COMPOSE_OPTS} --ignore-platform-reqs"
+    - name: "unit-tests/hhvm (allow-fail)"
+      php: hhvm
+      env:
+        - COMPOSE_OPTS="${COMPOSE_OPTS} --ignore-platform-reqs"
+    - name: "unit-tests/hhvm-nightly (allow-fail)"
+      php: hhvm-nightly
+      env:
+        - COMPOSE_OPTS="${COMPOSE_OPTS} --ignore-platform-reqs"
+
+  allow_failures:
+
+    - php: 7.4snapshot
+    - php: nightly
+    - php: hhvm
+    - php: hhvm-nightly
+
+
+before_install:
+
+  - if [[ ${CSFIXER_STAT} -ne 1 ]]; then
+      phpenv config-rm xdebug.ini || true
+    fi
+
+install :
+
+  - if [[ ${COMPOSE_STAT} -eq 1 ]]; then
+      travis_retry ${COMPOSE_EXEC} update ${COMPOSE_OPTS}
+    fi
+  - if [[ ${PHPUNIT_STAT} -eq 1 ]]; then
+      travis_retry ${PHPUNIT_EXEC} install
+    fi
+
+script:
+
+  - if [[ ${PHPUNIT_STAT} -eq 1 ]]; then
+      ${PHPUNIT_EXEC} ${PHPUNIT_OPTS}
+    fi
+  - if [[ ${CSFIXER_STAT} -eq 1 ]]; then
+      ${CSFIXER_EXEC} ${CSFIXER_OPTS}
+    fi
+
+after_success:
+
+  - if [[ ${PHPUNIT_STAT} -eq 1 ]] && [[ ${CODECOV_STAT} -eq 1 ]]; then
+      travis_retry ${CODECOV_EXEC} ${CODECOV_OPTS}
+    fi
