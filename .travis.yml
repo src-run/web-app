@@ -104,30 +104,31 @@ matrix:
 
 before_install:
 
+  - env
   - if [[ ${CSFIXER_STAT} -ne 1 ]]; then
-      phpenv config-rm xdebug.ini || true
+      phpenv config-rm xdebug.ini || true;
     fi
 
 install :
 
   - if [[ ${COMPOSE_STAT} -eq 1 ]]; then
-      travis_retry ${COMPOSE_EXEC} update ${COMPOSE_OPTS}
+      travis_retry ${COMPOSE_EXEC} update ${COMPOSE_OPTS};
     fi
   - if [[ ${PHPUNIT_STAT} -eq 1 ]]; then
-      travis_retry ${PHPUNIT_EXEC} install
+      travis_retry ${PHPUNIT_EXEC} install;
     fi
 
 script:
 
   - if [[ ${PHPUNIT_STAT} -eq 1 ]]; then
-      ${PHPUNIT_EXEC} ${PHPUNIT_OPTS}
+      ${PHPUNIT_EXEC} ${PHPUNIT_OPTS};
     fi
   - if [[ ${CSFIXER_STAT} -eq 1 ]]; then
-      ${CSFIXER_EXEC} ${CSFIXER_OPTS}
+      ${CSFIXER_EXEC} ${CSFIXER_OPTS};
     fi
 
 after_success:
 
   - if [[ ${PHPUNIT_STAT} -eq 1 ]] && [[ ${CODECOV_STAT} -eq 1 ]]; then
-      travis_retry ${CODECOV_EXEC} ${CODECOV_OPTS}
+      travis_retry ${CODECOV_EXEC} ${CODECOV_OPTS};
     fi
