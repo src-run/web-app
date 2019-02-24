@@ -69,14 +69,13 @@ matrix:
     - name: "code-check/7.3"
       php: 7.3
       env:
-        - COMPOSE_STAT=0
         - PHPUNIT_STAT=0
         - CSFIXER_STAT=1
     - name: "code-cover/7.3"
       php: 7.3
       env:
         - CODECOV_STAT=1
-        - PHPUNIT_OPTS="${PHPUNIT_SHARED_OPTS} --coverage-text --coverage-clover=${CODECOV_CLOVER_FILE}"
+        - PHPUNIT_OPTS="${PHPUNIT_SHARED_OPTS} --coverage-text --coverage-clover=${CODECOV_FILE_CLOVER}"
     - name: "unit-tests/7.4-snapshot (allow-fail)"
       php: 7.4snapshot
       env:
@@ -104,7 +103,6 @@ matrix:
 
 before_install:
 
-  - env
   - if [[ ${CSFIXER_STAT} -ne 1 ]]; then
       phpenv config-rm xdebug.ini || true;
     fi
